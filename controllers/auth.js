@@ -4,11 +4,20 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
-    const { name, email, password, collegeName, year, branch, interests } = req.body;
+    const { name, email, password, picture, collegeName, year, branch, interests } = req.body;
     try {
         const salt = await bcrypt.gensalt();
         password = await bcrypt.hash(password, salt);
-        const user = await User.create({ name, email, password, collegeName, year, branch, interests });
+        const user = await User.create({
+					name,
+					email,
+					password,
+					picture,
+					collegeName,
+					year,
+					branch,
+					interests,
+				});
         res.status(201).json({ user });
     } catch (error) {
         res.status(400).json({ error: error.message });
