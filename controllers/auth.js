@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
-    const { name, email, password, picture, collegeName, year, branch, interests } = req.body;
+    let { name, email, password, picture, collegeName, year, branch, interests } = req.body;
     try {
-        const salt = await bcrypt.gensalt();
+        const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
         const user = await User.create({
 					name,
@@ -20,24 +20,31 @@ export const register = async (req, res) => {
 				});
         res.status(201).json({ user });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message, });
     }
 }
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ error: "Please provide email and password" });
-    }
+    let { email, password } = req.body;
     try {
-        const user = User.findOne({ email });
+        if (!email || !password) {
+					return res
+						.status(400)
+						.json({ error: "Please provide email and password" });
+				}
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ error: "Invalid Credentials" });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(
+					password,
+					user.password,
+				);
+        
         if(!isMatch){
             return res.status(404).json({ error: "Invalid Credentials" });
         }
+        
         const jwt_token = jwt.sign({ id : user._id }, 
         process.env.JWT_SECRET_KEY, {
             expiresIn: 86400

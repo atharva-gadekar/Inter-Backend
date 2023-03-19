@@ -34,14 +34,14 @@ const storage = multer.diskStorage({
         cb(null, "public/assets");
     },
     filename: (req, file, cb) => {
-        cb(null, req.body.name);
+        cb(null, file.originalname);
     },
 });
 
 const upload = multer({ storage });
 
-app.use("/auth/register", upload.single("image"), register);
-app.use("/post" , authenticateJWT, upload.single("image"), createBlog);
+app.use("/auth/register", upload.single("picture"), register);
+app.use("/blog/create" , authenticateJWT, upload.single("banner"), createBlog);
 
 app.use("/auth",authRoute);
 app.use("/user",authenticateJWT , userRoute);

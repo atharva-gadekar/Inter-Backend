@@ -28,7 +28,7 @@ export const getUserBlogs = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        const blogs = await Blog.find({ user: req.params.id });
+        const blogs = await Blog.find({ owner: req.params.id });
         res.status(200).json({ blogs });
     }
     catch (error) {
@@ -103,11 +103,11 @@ export const addRemoveFollower = async (req, res) => {
         }
         if (user.followers.includes(req.params.followerID)) {
             user.followers.pull(req.params.followerID);
-            followers.following.pull(req.params.id);
+            follower.following.pull(req.params.id);
         }
         else {
             user.followers.push(req.params.followerID);
-            followers.following.push(req.params.id);
+            follower.following.push(req.params.id);
         }
         await user.save();
         await follower.save();

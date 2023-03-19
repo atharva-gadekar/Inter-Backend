@@ -4,16 +4,15 @@ const router = express.Router();
 import {
 	getAllBlogs,
 	getBlog,
-	createBlog,
 	addComment,
 	addLike,
 } from "../controllers/blog.js";
 
-router.get("/blog", getAllBlogs);
-router.get("/blog/:id", getBlog);
+router.get("/", getAllBlogs);
+router.get("/:id", getBlog);
 
-router.post("/blog/:id/comment", addComment);
-router.patch("/blog/:id/like", addLike);
+router.post("/:id/comment", addComment);
+router.patch("/:id/like", addLike);
 
 
 export default router;

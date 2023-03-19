@@ -56,11 +56,11 @@ export const addComment = async (req, res) => {
             return res.status(404).json({ error: "Blog not found" });
         }
 
-        const {content, author, blogID} = req.body;
+        const {content, author} = req.body;
         const comment = new Comment({
             content,
             author,
-            blogID,
+            blogID : blog._id,
         });
         comment.save();
 
@@ -76,7 +76,6 @@ export const addComment = async (req, res) => {
 
 export const addLike = async (req, res) => {
     try {
-        const {id} = req.params.id;
         const blog = await Blog.findById(req.params.id);
         if (!blog) {
             return res.status(404).json({ error: "Blog not found" });
@@ -91,7 +90,7 @@ export const addLike = async (req, res) => {
             blog.likes.set(userID, true);
         }
 
-        const updatedBlog = await Blog.findOneAndUpdate({__id : req.params.id}, {likes : blog.likes}, {new : true});
+        const updatedBlog = await Blog.findOneAndUpdate({_id : req.params.id}, {likes : blog.likes}, {new : true});
         updatedBlog.save();
 
         blog.save();
