@@ -29,6 +29,15 @@ const s3 = new S3Client({
 // router.patch("/:id/following/:followingID", addRemoveFollowing);
 // router.patch("/:id/followers/:followerID", addRemoveFollower);
 
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find();
+        res.status(200).json({ users });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const getUser = async (req, res) => {
     try {
         var user = await User.findById(req.params.id);
@@ -143,3 +152,23 @@ export const addRemoveFollower = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+// export const Searchbyuser = async (req,res) =>{
+//     const queryuser=new RegExp(req.params?.name,'i');
+//     if(queryuser!==''){
+//         try{
+//             const search_res=await User.find({
+//                 name:queryuser
+//             });
+//             res.status(200).json(search_res);
+//         }
+//         catch(error){
+//             console.log(error);
+//             res.status(404).json({message:'No matched User Found'});
+//         }
+        
+//     }
+//     else{
+//         res.status(404).json({message:"No queryuser"});
+//     }
+// }
