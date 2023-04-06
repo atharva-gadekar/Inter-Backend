@@ -84,8 +84,9 @@ export const login = async (req, res) => {
             process.env.JWT_SECRET_KEY, {
             expiresIn: 86400
         });
+        const id = user._id;
         delete user.password;
-        res.status(200).json({ jwt_token });
+        res.status(200).json({ jwt_token, id});
     }
     catch (error) {
         res.status(500).json({ error: error.message });
