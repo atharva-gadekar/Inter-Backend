@@ -42,6 +42,10 @@
 			ref: "User",
 			required: true,
 		},
+		bannerUrl : {
+			type: String,
+			required: false
+		}
 	});
 
 	export const Blog = mongoose.model("Blog", blogSchema);

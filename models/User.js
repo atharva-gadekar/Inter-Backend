@@ -34,6 +34,18 @@ const userSchema = new mongoose.Schema({
 		type: [String],
 		required: true,
 	},
+	title: {
+		type: String,
+		required: false,
+	},
+	about: {
+		type: String,
+		required: false,
+	},
+	url: {
+		type: String,
+		required: false,
+	},
 	following: [
 		{
 			type: mongoose.Schema.Types.ObjectId,

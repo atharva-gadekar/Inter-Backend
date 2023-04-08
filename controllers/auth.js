@@ -29,13 +29,14 @@ const s3 = new S3Client({
 export const register = async (req, res) => {
     let { name, email, password, collegeName, year, branch, interests } = req.body;
     try {
-
+        var buffer = req.file.buffer;
+        console.log(req.file.mimetype);
         const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
         const imgName = randomImgName();
         const params = {
             Bucket: bukcetName,
             Key: imgName,
-            Body: req.file.buffer,
+            Body: buffer,
             ContentType: req.file.mimetype,
         };
 

@@ -27,9 +27,21 @@ const s3 = new S3Client({
     region
 });
 
+
 export const getAllBlogs = async (req, res) => {
     try {
-        const blogs = await Blog.find();
+        const temp = await Blog.find().populate("owner");
+        temp.map(async blog=>{
+            const getObjectParams = {
+							Bucket: bukcetName,
+							Key: blog.bannerImage,
+						};
+            const command = new GetObjectCommand(getObjectParams);
+            const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+            blog.bannerUrl = bannerUrl;
+            await blog.save();
+        })
+        const blogs = await Blog.find().populate("owner");
         res.status(200).json({ blogs });
     } catch (error) {
         res.status(500).json({ error: error.message });
