@@ -8,6 +8,7 @@ import {
 	getUserFollowers,
 	addRemoveFollowing,
 	addRemoveFollower,
+	updateUser,
 	// Searchbyuser,
 	getAllUsers
 } from "../controllers/user.js";
@@ -20,6 +21,7 @@ router.get("/",getAllUsers);
 // router.get("/searchbyuser/:name",Searchbyuser);
 router.patch("/:id/following/:followingID", addRemoveFollowing);
 router.patch("/:id/followers/:followerID", addRemoveFollower);
+router.patch("/update/:id",updateUser);
 
 
 

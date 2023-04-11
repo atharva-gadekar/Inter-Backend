@@ -5,14 +5,20 @@
 			type: String,
 			required: true,
 		},
+		brief: {
+			type: String,
+			required:true,
+		},
+		date: {
+			type:Date,
+			default: Date.now,
+		}
+	,
 		bannerImage: {
 			type: String,
 			required: true,
 		},
-		date: {
-			type: Date,
-			default: Date.now,
-		},
+		
 		timeToRead: {
 			type: Number,
 			required: false,
@@ -43,5 +49,11 @@
 			required: true,
 		},
 	});
+
+	blogSchema.virtual('formattedDate').get(function () {
+		const date = new Date(this.date);
+		const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		return formattedDate;
+	  });
 
 	export const Blog = mongoose.model("Blog", blogSchema);

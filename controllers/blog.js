@@ -31,19 +31,21 @@ export const getBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, content, bannerImage, owner, tags , date } = req.body;
+        const { title, content, bannerImage, owner, tags ,brief, formattedDate } = req.body;
         const blog = new Blog({
             title,
             content,
             bannerImage,
             owner,
             tags,
-            date,
+            formattedDate,
+            brief,
             likes : {},
             comments : []
         })
         await blog.save();
-        res.status(201).json({ blog });
+        const date = blog.formattedDate;
+        res.status(201).json({ blog, date});
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -100,46 +102,100 @@ export const addLike = async (req, res) => {
     }
 }
 
-
-
-
-// export const SearchbyTag = async (req,res) =>{
-//     const querytag=new RegExp(req.params?.tags,'i');
-//     if(querytag!==''){
-//         try{
-//             const search_res=await Blog.find({
-//                 tags:querytag
-//             });
-//             res.status(200).json(search_res);
-//         }
-//         catch(error){
-//             console.log(error);
-//             res.status(404).json({message:'No matched Blog Found'});
-//         }
+export const updateblog= async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) {
+          return res.status(404).json({ message: "Blog post not found" });
+        }
+    
+        if (req.body.title) {
+          blog.title = req.body.title;
+        }
+    
+        if (req.body.content) {
+          blog.content = req.body.content;
+        }
+    
+        if (req.body.brief) {
+          blog.brief = req.body.brief;
+        }
+    
+        if (req.body.tags) {
+          blog.tags = req.body.tags;
+        }
+        // if(req.body.date){
+        //     blog.date = req.body.date;
+        // }
         
-//     }
-//     else{
-//         res.status(404).json({message:"No querytags"});
+    
+        const updatedBlog = await blog.save();
+        res.json(updatedBlog);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+  }
+
+//delete blog
+export const deleteBlog=async (req, res) => {
+    const { id } = req.params;
+    try {
+      const deletedBlog = await Blog.findByIdAndDelete(id);
+      if (!deletedBlog) {
+        return res.status(404).json({ error: 'Blog not found' });
+      }
+      res.json({ message: 'Blog deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  
+
+//   export const getAllComments = async (req, res) => {
+//     try {
+//         const blog = await Blog.findById(req.params.id).populate("comments");
+//         if (!blog) {
+//             return res.status(404).json({ error: "Blog not found" });
+//         }
+//         const comments = blog.comments;
+//         res.status(200).json({ comments });
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
 //     }
 // }
 
-// export const SearchbyTitle = async (req,res) =>{
-//     const querytitle=new RegExp(req.params?.title,'i');
-//     if(querytitle!==''){
-//         try{
-//             const search_res=await Blog.find({
-//                 title:querytitle
-//             });
-//             res.status(200).json(search_res);
-//         }
-//         catch(error){
-//             console.log(error);
-//             res.status(404).json({message:'No matched Blog Found'});
-//         }
-        
+
+//   //delete comment
+
+// export const deleteComment = async (req, res) => {
+//   try {
+//     const blog = await Blog.findById(req.params.blogId);
+//     if (!blog) {
+//       return res.status(404).json({ error: 'Blog not found' });
 //     }
-//     else{
-//         res.status(404).json({message:"No querytitle"}) ;
+
+//     const comment = await Comment.findById(req.params.commentId);
+//     if (!comment) {
+//       return res.status(404).json({ error: 'Comment not found' });
 //     }
-// }
+
+//     // Remove the comment from the blog's comments array
+//     blog.comments = blog.comments.filter((commentId) => commentId.toString() !== comment._id.toString());
+//     await blog.save();
+
+//     // Delete the comment from the database
+//     await Comment.findByIdAndDelete(req.params.commentId);
+
+//     res.status(204).send();
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
+
+
+
+
 

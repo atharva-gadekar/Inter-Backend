@@ -153,22 +153,45 @@ export const addRemoveFollower = async (req, res) => {
     }
 }
 
-// export const Searchbyuser = async (req,res) =>{
-//     const queryuser=new RegExp(req.params?.name,'i');
-//     if(queryuser!==''){
-//         try{
-//             const search_res=await User.find({
-//                 name:queryuser
-//             });
-//             res.status(200).json(search_res);
-//         }
-//         catch(error){
-//             console.log(error);
-//             res.status(404).json({message:'No matched User Found'});
-//         }
-        
-//     }
-//     else{
-//         res.status(404).json({message:"No queryuser"});
-//     }
-// }
+export const updateUser=async(req,res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+    
+        if (req.body.name) {
+          user.name = req.body.name;
+        }
+    
+        if (req.body.password) {
+          user.password = req.body.password;
+        }
+    
+        if (req.body.picture) {
+          user.picture = req.body.picture;
+        }
+    
+        if (req.body.collegeName) {
+          user.collegeName = req.body.collegeName;
+        }
+    
+        if (req.body.year) {
+          user.year = req.body.year;
+        }
+    
+        if (req.body.branch) {
+          user.branch = req.body.branch;
+        }
+    
+        if (req.body.interests) {
+          user.interests = req.body.interests;
+        }
+    
+        const updatedUser = await user.save();
+        res.json(updatedUser);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+}
+

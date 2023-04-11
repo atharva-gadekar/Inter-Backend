@@ -15,6 +15,8 @@ import { authenticateJWT } from "./middleware/verifyUser.js"
 import { createBlog } from "./controllers/blog.js"
 import blogRoute from "./routes/blog.js"
 import searchRoute from "./routes/search.js"
+import conversationRoute from "./routes/conversations.js";
+import messageRoute from "./routes/messages.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,9 +43,11 @@ app.use("/auth/register", upload.single("pfp"), register);
 app.use("/blog/create", authenticateJWT, upload.single("banner"), createBlog);
 
 app.use("/auth", authRoute);
-app.use("/user", authenticateJWT, userRoute);
 app.use("/blog", authenticateJWT, blogRoute);
+app.use("/user", authenticateJWT, userRoute);
 app.use("/search", authenticateJWT, searchRoute);
+app.use("/conversations", conversationRoute);
+app.use("/messages", messageRoute);
 
 const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
