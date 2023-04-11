@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	username: {
+		type: String,
+		required: false,
+	},
 	picture: {
 		type: String,
 		required: true,
@@ -33,6 +37,18 @@ const userSchema = new mongoose.Schema({
 	interests: {
 		type: [String],
 		required: true,
+	},
+	title: {
+		type: String,
+		required: false,
+	},
+	about: {
+		type: String,
+		required: false,
+	},
+	url: {
+		type: String,
+		required: false,
 	},
 	following: [
 		{

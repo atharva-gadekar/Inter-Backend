@@ -48,6 +48,10 @@
 			ref: "User",
 			required: true,
 		},
+		bannerUrl : {
+			type: String,
+			required: false
+		}
 	});
 
 	blogSchema.virtual('formattedDate').get(function () {

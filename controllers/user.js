@@ -53,6 +53,7 @@ export const getUser = async (req, res) => {
         res.status(200).json({ user, url });
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 }
@@ -77,7 +78,22 @@ export const getUserFollowing = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        const following = user.following;
+        const followings = user.following;
+        followings.map(async user=>{
+             const getObjectParams = {
+            Bucket: bukcetName,
+            Key: user.picture,
+        }
+        const command = new GetObjectCommand(getObjectParams);
+        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        user.url = url;
+        await user.save();
+        })
+        const temp = await User.findById(req.params.id).populate(
+                            "following"
+                        );
+        const following = temp.following;
+
         res.status(200).json({ following });
     }
     catch (error) {

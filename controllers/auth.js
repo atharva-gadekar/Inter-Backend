@@ -8,6 +8,7 @@ import sharp from "sharp";
 import crypto from "crypto";
 import path from "path";
 import dotenv from "dotenv";
+import cookie from "cookie-parser";
 
 dotenv.config();
 
@@ -29,13 +30,14 @@ const s3 = new S3Client({
 export const register = async (req, res) => {
     let { name, email, password, collegeName, year, branch, interests } = req.body;
     try {
-
+        var buffer = req.file.buffer;
+        console.log(req.file.mimetype);
         const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
         const imgName = randomImgName();
         const params = {
             Bucket: bukcetName,
             Key: imgName,
-            Body: req.file.buffer,
+            Body: buffer,
             ContentType: req.file.mimetype,
         };
 
@@ -60,7 +62,7 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    let { email, password } = req.body;
+    let { email, password, rememberMe } = req.body;
     try {
         if (!email || !password) {
             return res
@@ -71,23 +73,23 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "Invalid Credentials" });
         }
-        const isMatch = await bcrypt.compare(
-            password,
-            user.password,
-        );
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(404).json({ error: "Invalid Credentials" });
         }
 
-        const jwt_token = jwt.sign({ id: user._id },
-            process.env.JWT_SECRET_KEY, {
-            expiresIn: 86400
+        const expiresIn = rememberMe ? "7d" : "24h"; // Set token expiration
+        const jwt_token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+            expiresIn,
         });
+        const id = user._id;
         delete user.password;
-        res.status(200).json({ jwt_token });
-    }
-    catch (error) {
+        res.status(200).cookie("jwt_token", jwt_token, {
+            httpOnly: true,
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Set cookie expiration
+        }).json({ id, jwt_token });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};

@@ -3,7 +3,6 @@ const router = express.Router();
 
 import {
 	getAllBlogs,
-	getBlog,
 	addComment,
 	deleteBlog,
 	addLike,
@@ -14,9 +13,7 @@ import {
 } from "../controllers/blog.js";
 
 router.get("/", getAllBlogs);
-router.get("/:id", getBlog);
-// router.get("/searchbytag/:tags",SearchbyTag);
-// router.get("/searchbytitle/:title",SearchbyTitle);
+// router.get("/:id", getBlog);
 router.post("/:id/comment", addComment);
 router.patch("/:id/like", addLike);
 router.patch("/update/:id",updateblog);

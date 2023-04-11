@@ -17,6 +17,7 @@ import blogRoute from "./routes/blog.js"
 import searchRoute from "./routes/search.js"
 import conversationRoute from "./routes/conversations.js";
 import messageRoute from "./routes/messages.js";
+import { getBlog } from "./controllers/blog.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +46,7 @@ app.use("/blog/create", authenticateJWT, upload.single("banner"), createBlog);
 app.use("/auth", authRoute);
 app.use("/blog", authenticateJWT, blogRoute);
 app.use("/user", authenticateJWT, userRoute);
+app.use("/blog/:id", getBlog);
 app.use("/search", authenticateJWT, searchRoute);
 app.use("/conversations", conversationRoute);
 app.use("/messages", messageRoute);
