@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
 	},
 	year: {
 		type: Number,
-		required: true,
+		required: false,
 	},
 	branch: {
 		type: String,
