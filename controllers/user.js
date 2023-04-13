@@ -175,17 +175,9 @@ export const updateUser=async(req,res) => {
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
-    
-        if (req.body.name) {
-          user.name = req.body.name;
-        }
-    
-        if (req.body.password) {
-          user.password = req.body.password;
-        }
-    
-        if (req.body.picture) {
-          user.picture = req.body.picture;
+
+        if (req.body.username) {
+          user.username = req.body.username;
         }
     
         if (req.body.collegeName) {
@@ -203,7 +195,16 @@ export const updateUser=async(req,res) => {
         if (req.body.interests) {
           user.interests = req.body.interests;
         }
-    
+        
+        if(req.body.title) {
+            user.title = req.body.title;
+        }
+
+         if(req.body.about) {
+            user.about = req.body.about;
+        }
+
+
         const updatedUser = await user.save();
         res.json(updatedUser);
       } catch (error) {
