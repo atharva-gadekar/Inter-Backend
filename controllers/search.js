@@ -79,9 +79,10 @@ export const searchbyinterests= async (req, res) => {
         
         // const users = await User.find({ interests: { $in: interests } });
     let users;
-        console.log(interests[0]);
+    console.log(interests);
+
     if (interestsCount==1) {
-      users = await User.find({ interests: interests[0] });
+      users = await User.find({ interests: {$in: interests }});
     } else {
     //   interests = interests.split(",");
       users = await User.find({ interests: { $in: interests } });

@@ -53,14 +53,17 @@ app.use("/messages", messageRoute);
 
 //socketio work
 
-const io = require("socket.io")(8900, {
-    cors: {
-      origin: "http://localhost:3001",
-    },
-  });
-  
+import { Server } from "socket.io";
+
+const io = new Server(8900, {
+  cors: {
+    origin: "http://localhost:3001",
+  },
+});
+
+
+
   let users = [];
-  
   const addUser = (userId, socketId) => {
     !users.some((user) => user.userId === userId) &&
       users.push({ userId, socketId });
