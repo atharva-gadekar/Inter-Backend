@@ -62,3 +62,34 @@ export const SearchbyTitle = async (req,res) =>{
     }
 }
 
+
+//search on the basis of interests
+
+export const searchbyinterests= async (req, res) => {
+    try {
+        console.log(req.params.interests.split(","));
+        let interests = req.params.interests.split(",");
+        if (!interests) {
+          return res.status(400).json({ error: 'Interests parameter is missing' });
+        }
+        
+        // interests = interests.split(',');
+        const interestsCount = interests.length;
+        console.log(interestsCount);
+        
+        // const users = await User.find({ interests: { $in: interests } });
+    let users;
+        console.log(interests[0]);
+    if (interestsCount==1) {
+      users = await User.find({ interests: interests[0] });
+    } else {
+    //   interests = interests.split(",");
+      users = await User.find({ interests: { $in: interests } });
+    }
+        res.json(users);
+      } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+      }
+    }
+
