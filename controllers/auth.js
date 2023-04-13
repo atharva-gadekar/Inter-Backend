@@ -9,8 +9,11 @@ import crypto from "crypto";
 import path from "path";
 import dotenv from "dotenv";
 import cookie from "cookie-parser";
-
+import mailgun from "mailgun-js";
 dotenv.config();
+const DOMAIN = 'sandbox4a3f6d145f8e46d3bb0e3dc3773e3159.mailgun.org';
+const mg = mailgun({ apiKey: process.env.MAILGUN_APIKEY, domain: DOMAIN });
+
 
 const bukcetName = process.env.BUCKET_NAME;
 const region = process.env.BUCKET_REGION;
@@ -46,18 +49,18 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
         const user = await User.create({
-					name,
-					email,
-					password,
-					picture: params.Key,
-					collegeName,
-					year,
-					branch,
-					interests,
-					title,
-					about,
-					username,
-				});
+            name,
+            email,
+            password,
+            picture: params.Key,
+            collegeName,
+            year,
+            branch,
+            interests,
+            title,
+            username,
+            about
+        });
         res.status(201).json({ user });
     } catch (error) {
         res.status(400).json({ error: error.message, });
@@ -95,4 +98,74 @@ export const login = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+
 };
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: "user with this email does not exist" });
+        } else {
+            const token = jwt.sign({ _id: user._id, email, password: user.password }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+            const data = {
+                from: 'noreply@hello.com',
+                to: email,
+                subject: 'Password Reset Link',
+                html: `
+                    <h2>Please click on given link to reset your password</h2>
+                    <p>${process.env.CLIENT_URL}/resetpassword/${token}</p>
+                `
+            };
+            await user.updateOne({ resetLink: token });
+            await mg.messages().send(data);
+            return res.json({ message: 'Email has been sent, kindly reset your password' });
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({ error: "reset password error" });
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    try {
+        let { resetLink, newPassword } = req.body;
+
+        if (!resetLink) {
+            return res.status(400).json({ error: "Reset link is required" });
+        }
+
+        jwt.verify(resetLink, process.env.JWT_SECRET_KEY, async (err, decodedData) => {
+            if (err) {
+                console.log(err);
+                return res.status(401).json({ error: "Incorrect or expired token. Please request a new password reset." });
+            }
+
+            const user = await User.findOne({ _id: decodedData._id, resetLink });
+
+            if (!user) {
+                return res.status(400).json({ error: "User with this token does not exist" });
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            newPassword = await bcrypt.hash(newPassword, salt);
+
+
+
+            user.password = newPassword;
+            user.resetLink = "";
+
+            await user.save();
+
+            return res.status(200).json({ message: "Your password has been successfully updated" });
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({ error: "Reset password error" });
+    }
+};
+
+
+
+
