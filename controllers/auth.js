@@ -10,6 +10,7 @@ import path from "path";
 import dotenv from "dotenv";
 import cookie from "cookie-parser";
 import mailgun from "mailgun-js";
+import nodemailer from "nodemailer";
 dotenv.config();
 const DOMAIN = 'sandbox4a3f6d145f8e46d3bb0e3dc3773e3159.mailgun.org';
 const mg = mailgun({ apiKey: process.env.MAILGUN_APIKEY, domain: DOMAIN });
@@ -101,6 +102,17 @@ export const login = async (req, res) => {
 
 };
 
+
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp-relay.sendinblue.com',
+    port: 587,
+    auth: {
+        user: 'nightthrasher10@gmail.com',
+        pass: 'GR43tC95dyPzgL7m'
+    }
+});
+
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -109,7 +121,7 @@ export const forgotPassword = async (req, res) => {
             return res.status(404).json({ error: "user with this email does not exist" });
         } else {
             const token = jwt.sign({ _id: user._id, email, password: user.password }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-            const data = {
+            const mailOptions = {
                 from: 'noreply@hello.com',
                 to: email,
                 subject: 'Password Reset Link',
@@ -119,7 +131,7 @@ export const forgotPassword = async (req, res) => {
                 `
             };
             await user.updateOne({ resetLink: token });
-            await mg.messages().send(data);
+            await transporter.sendMail(mailOptions);
             return res.json({ message: 'Email has been sent, kindly reset your password' });
         }
     } catch (err) {
