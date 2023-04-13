@@ -69,7 +69,7 @@ export const getBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, content, owner, tags, formattedDate } = req.body;
+        const { title, content, owner, tags, formattedDate, brief } = req.body;
         const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
         const imgName = randomImgName();
         const params = {
@@ -84,6 +84,7 @@ export const createBlog = async (req, res) => {
         const blog = new Blog({
             title,
             content,
+            brief,
             bannerImage: imgName,
             owner,
             formattedDate,
@@ -95,6 +96,7 @@ export const createBlog = async (req, res) => {
         const date = blog.formattedDate;
         res.status(201).json({ blog, date });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 }
@@ -118,7 +120,6 @@ export const addComment = async (req, res) => {
         // const comment = await Comment.create(req.body);
         blog.comments.push(comment);
         blog.save();
-        comment.save();
         res.status(201).json({ comment });
     } catch (error) {
         res.status(500).json({ error: error.message });

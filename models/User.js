@@ -5,6 +5,18 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	username: {
+		type: String,
+		required: true,
+	},
+	title: {
+		type: String,
+		required: true,
+	},
+	about: {
+		type: String,
+		required: true,
+	},
 	email: {
 		type: String,
 		required: true,
@@ -16,8 +28,13 @@ const userSchema = new mongoose.Schema({
 	},
 	username: {
 		type: String,
+		required: true,
+	},
+	resetLink: {
+		type: String,
 		required: false,
 	},
+
 	picture: {
 		type: String,
 		required: true,
@@ -28,7 +45,7 @@ const userSchema = new mongoose.Schema({
 	},
 	year: {
 		type: Number,
-		required: true,
+		required: false,
 	},
 	branch: {
 		type: String,
@@ -40,7 +57,7 @@ const userSchema = new mongoose.Schema({
 	},
 	title: {
 		type: String,
-		required: false,
+		required: true,
 	},
 	about: {
 		type: String,
