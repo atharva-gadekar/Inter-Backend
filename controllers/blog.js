@@ -96,6 +96,7 @@ export const createBlog = async (req, res) => {
         const date = blog.formattedDate;
         res.status(201).json({ blog, date });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 }

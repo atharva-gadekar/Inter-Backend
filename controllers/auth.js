@@ -28,7 +28,7 @@ const s3 = new S3Client({
 
 
 export const register = async (req, res) => {
-    let { name, email, password, collegeName, year, branch, interests } = req.body;
+    let { name, email, password, collegeName, year, branch, interests, title, about, username } = req.body;
     try {
         var buffer = req.file.buffer;
         console.log(req.file.mimetype);
@@ -46,15 +46,18 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
         const user = await User.create({
-            name,
-            email,
-            password,
-            picture: params.Key,
-            collegeName,
-            year,
-            branch,
-            interests,
-        });
+					name,
+					email,
+					password,
+					picture: params.Key,
+					collegeName,
+					year,
+					branch,
+					interests,
+					title,
+					about,
+					username,
+				});
         res.status(201).json({ user });
     } catch (error) {
         res.status(400).json({ error: error.message, });

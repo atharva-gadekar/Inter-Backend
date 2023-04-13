@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
 	},
 	username: {
 		type: String,
-		required: false,
+		required: true,
 	},
 	picture: {
 		type: String,
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
 	},
 	title: {
 		type: String,
-		required: false,
+		required: true,
 	},
 	about: {
 		type: String,
