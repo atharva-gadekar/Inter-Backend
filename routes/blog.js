@@ -16,8 +16,8 @@ router.get("/", getAllBlogs);
 // router.get("/:id", getBlog);
 router.patch("/:id/like", addLike);
 router.post("/:id/comment", addComment);
-router.patch("/update/:id",updateblog);
-router.delete("/delete/:id",deleteBlog);
+router.patch("/update/:id", updateblog);
+router.delete("/delete/:id", deleteBlog);
 // router.delete("/:id/comments/:id",deleteComment);
 // router.get("/:id/comments",getAllComments);
 

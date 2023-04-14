@@ -79,19 +79,19 @@ export const getUserFollowing = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
         const followings = user.following;
-        followings.map(async user=>{
-             const getObjectParams = {
-            Bucket: bukcetName,
-            Key: user.picture,
-        }
-        const command = new GetObjectCommand(getObjectParams);
-        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        user.url = url;
-        await user.save();
+        followings.map(async user => {
+            const getObjectParams = {
+                Bucket: bukcetName,
+                Key: user.picture,
+            }
+            const command = new GetObjectCommand(getObjectParams);
+            const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+            user.url = url;
+            await user.save();
         })
         const temp = await User.findById(req.params.id).populate(
-                            "following"
-                        );
+            "following"
+        );
         const following = temp.following;
 
         res.status(200).json({ following });
@@ -169,46 +169,59 @@ export const addRemoveFollower = async (req, res) => {
     }
 }
 
-export const updateUser=async(req,res) => {
+export const updateUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-          return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
         }
 
         if (req.body.username) {
-          user.username = req.body.username;
+            user.username = req.body.username;
         }
-    
+
         if (req.body.collegeName) {
-          user.collegeName = req.body.collegeName;
+            user.collegeName = req.body.collegeName;
         }
-    
+
         if (req.body.year) {
-          user.year = req.body.year;
+            user.year = req.body.year;
         }
-    
+
         if (req.body.branch) {
-          user.branch = req.body.branch;
+            user.branch = req.body.branch;
         }
-    
+
         if (req.body.interests) {
-          user.interests = req.body.interests;
+            user.interests = req.body.interests;
         }
-        
-        if(req.body.title) {
+
+        if (req.body.title) {
             user.title = req.body.title;
         }
 
-         if(req.body.about) {
+        if (req.body.about) {
             user.about = req.body.about;
         }
 
+        
 
         const updatedUser = await user.save();
         res.json(updatedUser);
-      } catch (error) {
+    } catch (error) {
         res.status(500).json({ message: error.message });
-      }
+    }
 }
 
+export const getAllBlogsByUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const blogs = await Blog.find({ owner: user._id });
+        res.json(blogs);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};

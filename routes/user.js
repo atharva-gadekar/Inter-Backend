@@ -10,18 +10,19 @@ import {
 	addRemoveFollower,
 	updateUser,
 	// Searchbyuser,
-	getAllUsers
+	getAllUsers,
+	getAllBlogsByUser
 } from "../controllers/user.js";
-
+router.get("/:id/userblogs", getAllBlogsByUser);
 router.get("/:id/blogs", getUserBlogs);
 router.get("/:id/following", getUserFollowing);
 router.get("/:id/followers", getUserFollowers);
 router.get("/:id", getUser);
-router.get("/",getAllUsers);
+router.get("/", getAllUsers);
 // router.get("/searchbyuser/:name",Searchbyuser);
 router.patch("/:id/following/:followingID", addRemoveFollowing);
 router.patch("/:id/followers/:followerID", addRemoveFollower);
-router.patch("/update/:id",updateUser);
+router.patch("/update/:id", updateUser);
 
 
 
