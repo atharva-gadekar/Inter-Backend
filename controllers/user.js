@@ -204,6 +204,7 @@ export const updateUser=async(req,res) => {
             user.about = req.body.about;
         }
 
+        
 
         const updatedUser = await user.save();
         res.json(updatedUser);
