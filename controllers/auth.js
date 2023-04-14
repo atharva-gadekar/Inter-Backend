@@ -9,11 +9,8 @@ import crypto from "crypto";
 import path from "path";
 import dotenv from "dotenv";
 import cookie from "cookie-parser";
-import mailgun from "mailgun-js";
 import nodemailer from "nodemailer";
 dotenv.config();
-const DOMAIN = 'sandbox4a3f6d145f8e46d3bb0e3dc3773e3159.mailgun.org';
-const mg = mailgun({ apiKey: process.env.MAILGUN_APIKEY, domain: DOMAIN });
 
 
 const bukcetName = process.env.BUCKET_NAME;

@@ -5,10 +5,6 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	username: {
-		type: String,
-		required: true,
-	},
 	title: {
 		type: String,
 		required: true,
@@ -34,7 +30,6 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: false,
 	},
-
 	picture: {
 		type: String,
 		required: true,
@@ -57,7 +52,7 @@ const userSchema = new mongoose.Schema({
 	},
 	title: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	about: {
 		type: String,
