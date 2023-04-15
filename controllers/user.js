@@ -206,6 +206,8 @@ export const updateUser = async (req, res) => {
 
         
 
+        
+
         const updatedUser = await user.save();
         res.json(updatedUser);
     } catch (error) {
