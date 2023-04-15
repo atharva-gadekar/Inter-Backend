@@ -442,7 +442,12 @@ export const notifyUser = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
 	try {
-		const user = await User.findById(req.params.id).populate("notifications");
+		const user = await User.findById(req.params.id).populate({
+			path: "notifications",
+			populate: [
+				{ path: "sender"},
+			],
+		});
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
