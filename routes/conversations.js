@@ -9,6 +9,8 @@ import { Conversation } from "../models/conversation.js";
 router.post("/", async (req, res) => {
   const newConversation = new Conversation({
     members: [req.body.senderId, req.body.receiverId],
+    // lastMessage:{},
+    // lastMessageTime: new Date(),
   });
 
   try {
