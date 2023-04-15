@@ -12,6 +12,7 @@ import path from "path";
 import { Blog } from "../models/Blog.js";
 import { Comment } from "../models/Comment.js";
 import dotenv from "dotenv";
+import { User } from "../models/User.js";
 
 dotenv.config();
 const bukcetName = process.env.BUCKET_NAME;
@@ -41,7 +42,7 @@ export const getAllBlogs = async (req, res) => {
             blog.bannerUrl = bannerUrl;
             await blog.save();
         })
-        const blogs = await Blog.find().populate("owner");
+        const blogs = await Blog.find().populate("owner").sort({ date: -1 });
         res.status(200).json({ blogs });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -139,8 +140,19 @@ export const addLike = async (req, res) => {
         if (isLiked) {
             blog.likes.delete(userID);
         } else {
-            blog.likes.set(userID, true);
-        }
+					blog.likes.set(userID, true);
+					const user = await User.findById(userID);
+
+					let arr1 = [1, 2, 3, 4];
+					let arr2 = [3, 4, 5, 6];
+
+					blog.tags
+						.filter((item) => !user.likedTags.includes(item))
+						.forEach((item) => user.likedTags.push(item));
+
+					console.log(user.likedTags);
+					user.save();
+				}
 
         const updatedBlog = await Blog.findOneAndUpdate({ _id: req.params.id }, { likes: blog.likes }, { new: true });
         updatedBlog.save();
