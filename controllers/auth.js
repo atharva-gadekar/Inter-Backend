@@ -61,6 +61,7 @@ export const register = async (req, res) => {
         });
         res.status(201).json({ user });
     } catch (error) {
+        console.log(err);
         res.status(400).json({ error: error.message, });
     }
 }

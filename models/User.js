@@ -74,11 +74,28 @@ const userSchema = new mongoose.Schema({
 			ref: "User",
 		},
 	],
+	connections: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
+	],
 	posts: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Post",
 		},
+	],
+	likedTags: [
+		{ 
+			type: String,
+			required: false 
+		}],
+	notifications: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Notification",
+		}
 	],
 	createdAt: {
 		type: Date,
