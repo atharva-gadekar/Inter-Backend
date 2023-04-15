@@ -5,10 +5,6 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	username: {
-		type: String,
-		required: true,
-	},
 	title: {
 		type: String,
 		required: false,
@@ -34,7 +30,6 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: false,
 	},
-
 	picture: {
 		type: String,
 		required: true,
@@ -57,7 +52,7 @@ const userSchema = new mongoose.Schema({
 	},
 	title: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	about: {
 		type: String,
@@ -79,11 +74,28 @@ const userSchema = new mongoose.Schema({
 			ref: "User",
 		},
 	],
+	connections: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
+	],
 	posts: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Post",
 		},
+	],
+	likedTags: [
+		{ 
+			type: String,
+			required: false 
+		}],
+	notifications: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Notification",
+		}
 	],
 	createdAt: {
 		type: Date,

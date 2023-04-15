@@ -20,4 +20,5 @@ router.get("/:query", searchAll);
 // router.get("/btitle/:title",SearchbyTitle);
 // router.get("/api/:interests",searchbyinterests);
 
+
 export default router;
