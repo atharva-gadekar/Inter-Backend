@@ -14,6 +14,7 @@ import {
 	getUserConnections,
 	notifyUser,
 	getUserNotifications,
+	ignoreConnection
 } from "../controllers/user.js";
 
 
@@ -34,6 +35,7 @@ router.post("/notify", notifyUser);
 // router.get("/searchbyuser/:name",Searchbyuser);
 router.patch("/:id/following/:followingID", addRemoveConnection);
 router.patch("/:id/connect/:connectionID", addRemoveConnection);
+router.patch("/:id/ignore/:connectionID", ignoreConnection);
 
 router.patch("/update/:id", updateUser);
 
