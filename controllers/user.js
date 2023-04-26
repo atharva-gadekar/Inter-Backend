@@ -391,8 +391,11 @@ export const searchByOneInterest = async (req, res) => {
         
 		// Find other users who have at least one common interest with the logged-in user
 		const matchingUsers = await User.find({
-			interests: target_interest,
-			_id: { $ne: currentUser._id },
+			$and: [
+				{interests: target_interest},
+				{_id: { $ne: currentUser._id }},
+				{_id: { $nin: currentUser.connections }},
+			],
 		});
 
 		// Calculate the number of common interests between the logged-in user and each user found in step 2
