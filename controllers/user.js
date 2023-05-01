@@ -3,7 +3,7 @@ import { Blog } from "../models/Blog.js";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from "dotenv";
-import {Notification} from "../models/Notification.js"
+import { Notification } from "../models/Notification.js"
 
 dotenv.config();
 
@@ -14,11 +14,11 @@ const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 
 
 const s3 = new S3Client({
-    credentials: {
-        accessKeyId,
-        secretAccessKey,
-    },
-    region
+	credentials: {
+		accessKeyId,
+		secretAccessKey,
+	},
+	region
 });
 
 
@@ -31,46 +31,46 @@ const s3 = new S3Client({
 // router.patch("/:id/followers/:followerID", addRemoveFollower);
 
 export const getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find();
-        res.status(200).json({ users });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+	try {
+		const users = await User.find();
+		res.status(200).json({ users });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
 }
 
 export const getUser = async (req, res) => {
-    try {
-        var user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const getObjectParams = {
-            Bucket: bukcetName,
-            Key: user.picture,
-        }
-        const command = new GetObjectCommand(getObjectParams);
-        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        res.status(200).json({ user, url });
-    }
-    catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
-    }
+	try {
+		var user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		const getObjectParams = {
+			Bucket: bukcetName,
+			Key: user.picture,
+		}
+		const command = new GetObjectCommand(getObjectParams);
+		const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+		res.status(200).json({ user, url });
+	}
+	catch (error) {
+		console.log(error);
+		res.status(500).json({ error: error.message });
+	}
 }
 
 export const getUserBlogs = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const blogs = await Blog.find({ owner: req.params.id });
-        res.status(200).json({ blogs });
-    }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+	try {
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		const blogs = await Blog.find({ owner: req.params.id });
+		res.status(200).json({ blogs });
+	}
+	catch (error) {
+		res.status(500).json({ error: error.message });
+	}
 }
 
 // export const getUserFollowing = async (req, res) => {
@@ -105,7 +105,7 @@ export const getUserBlogs = async (req, res) => {
 export const getUserConnections = async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id).populate("connections");
-        
+
 		if (!user) {
 			return res.status(404).json({ error: "User not found" });
 		}
@@ -121,10 +121,10 @@ export const getUserConnections = async (req, res) => {
 			await user.save();
 		});
 		const temp = await User.findById(req.params.id).populate("connections");
-         console.log(temp);
+		console.log(temp);
 		const connections = temp.connections;
 
-       
+
 
 		res.status(200).json({ connections });
 	} catch (error) {
@@ -185,10 +185,10 @@ export const addRemoveConnection = async (req, res) => {
 		}
 		if (user.connections.includes(req.params.connectionID)) {
 			user.connections.pull(req.params.connectionID);
-            connection.connections.pull(user._id);
+			connection.connections.pull(user._id);
 		} else {
 			user.connections.push(req.params.connectionID);
-            connection.connections.push(user._id);
+			connection.connections.push(user._id);
 		}
 
 		await user.save();
@@ -228,62 +228,62 @@ export const addRemoveConnection = async (req, res) => {
 // }
 
 export const updateUser = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+	try {
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
 
-        if (req.body.username) {
-            user.username = req.body.username;
-        }
+		if (req.body.username) {
+			user.username = req.body.username;
+		}
 
-        if (req.body.collegeName) {
-            user.collegeName = req.body.collegeName;
-        }
+		if (req.body.collegeName) {
+			user.collegeName = req.body.collegeName;
+		}
 
-        if (req.body.year) {
-            user.year = req.body.year;
-        }
+		if (req.body.year) {
+			user.year = req.body.year;
+		}
 
-        if (req.body.branch) {
-            user.branch = req.body.branch;
-        }
+		if (req.body.branch) {
+			user.branch = req.body.branch;
+		}
 
-        if (req.body.interests) {
-            user.interests = req.body.interests;
-        }
+		if (req.body.interests) {
+			user.interests = req.body.interests;
+		}
 
-        if (req.body.title) {
-            user.title = req.body.title;
-        }
+		if (req.body.title) {
+			user.title = req.body.title;
+		}
 
-        if (req.body.about) {
-            user.about = req.body.about;
-        }
+		if (req.body.about) {
+			user.about = req.body.about;
+		}
 
-        
 
-        
 
-        const updatedUser = await user.save();
-        res.json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+
+
+		const updatedUser = await user.save();
+		res.json(updatedUser);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
 }
 
 export const getAllBlogsByUser = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const blogs = await Blog.find({ owner: user._id });
-        res.json(blogs);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+	try {
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+		const blogs = await Blog.find({ owner: user._id });
+		res.json(blogs);
+	} catch (err) {
+		res.status(500).json({ message: err.message });
+	}
 };
 
 //My Approach
@@ -326,7 +326,7 @@ export const getAllBlogsByUser = async (req, res) => {
 //         );
 
 //         let set = new Set(arr1.concat(arr2));
-                
+
 //         let sortedUsers = [];
 //         sortedUsers = [...set];
 
@@ -386,9 +386,9 @@ export const searchByOneInterest = async (req, res) => {
 	try {
 		// Get the logged-in user's interests
 		const target_interest = req.params.interest;
-        const currentUser = await User.findById(req.params.id);
-        const currentUserInterests = currentUser.interests;
-        
+		const currentUser = await User.findById(req.params.id);
+		const currentUserInterests = currentUser.interests;
+
 		// Find other users who have at least one common interest with the logged-in user
 		const matchingUsers = await User.find({
 			interests: target_interest,
@@ -400,6 +400,7 @@ export const searchByOneInterest = async (req, res) => {
 			const commonInterests = user.interests.filter((interest) =>
 				currentUserInterests.includes(interest)
 			);
+
 			return { user, commonInterests };
 		});
 
@@ -408,7 +409,7 @@ export const searchByOneInterest = async (req, res) => {
 			(a, b) => b.commonInterests.length - a.commonInterests.length
 		);
 
-       
+
 
 		// Present the list of similar users to the logged-in user
 		res.json(sortedUsers);
@@ -421,7 +422,7 @@ export const searchByOneInterest = async (req, res) => {
 
 export const notifyUser = async (req, res) => {
 	try {
-		let {sender, receiver, message} = req.body;
+		let { sender, receiver, message } = req.body;
 		receiver = await User.findById(receiver);
 
 		if (!receiver) {
@@ -429,9 +430,9 @@ export const notifyUser = async (req, res) => {
 		}
 
 		const notification = new Notification({
-			sender : sender,
-			receiver : receiver._id,
-			message : message,
+			sender: sender,
+			receiver: receiver._id,
+			message: message,
 		});
 		const savedNotification = await notification.save();
 		receiver.notifications.push(notification);

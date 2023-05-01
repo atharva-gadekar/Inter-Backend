@@ -18,7 +18,7 @@ import searchRoute from "./routes/search.js"
 import conversationRoute from "./routes/conversations.js";
 import messageRoute from "./routes/messages.js";
 import { getBlog } from "./controllers/blog.js"
-
+import interestRoute from "./routes/interests.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -50,12 +50,12 @@ app.use("/blog/:id", getBlog);
 app.use("/search", authenticateJWT, searchRoute);
 app.use("/conversations", conversationRoute);
 app.use("/messages", messageRoute);
-
+app.use("/interests", authenticateJWT, interestRoute);
 //socketio work
 
-  //port
+//port
 
-  const PORT = process.env.PORT || 5000;
-  mongoose.connect(process.env.CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => app.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
-      .catch((error) => console.log(error.message));
+const PORT = process.env.PORT || 5000;
+mongoose.connect(process.env.CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => app.listen(PORT, () => console.log(`Server running on port: ${PORT}`)))
+  .catch((error) => console.log(error.message));
