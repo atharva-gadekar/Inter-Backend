@@ -70,7 +70,9 @@ export const getBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, content, owner, tags, formattedDate, brief } = req.body;
+        const { title, content, owner, formattedDate, brief } = req.body;
+        var {tags} = req.body;
+        tags = tags.split(",");
         const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
         const imgName = randomImgName();
         const params = {
@@ -79,6 +81,8 @@ export const createBlog = async (req, res) => {
             Body: req.file.buffer,
             ContentType: req.file.mimetype,
         };
+
+        console.log(tags);
 
         const command = new PutObjectCommand(params);
         const result = await s3.send(command);
