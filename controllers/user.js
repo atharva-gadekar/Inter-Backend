@@ -175,7 +175,7 @@ export const getUserConnections = async (req, res) => {
 
 export const addRemoveConnection = async (req, res) => {
 	try {
-		const user = await User.findById(req.params.id);
+		const user = await User.findById(req.params.id).populate("notifications");
 		if (!user) {
 			return res.status(404).json({ error: "User not found" });
 		}
@@ -189,6 +189,16 @@ export const addRemoveConnection = async (req, res) => {
 		} else {
 			user.connections.push(req.params.connectionID);
 			connection.connections.push(user._id);
+			var notifs = user.notifications;
+			var target = "";
+			notifs.map((notif) => {
+				if (notif.sender._id == req.params.connectionID) {
+					target = notif;
+				}
+			})
+			if (target != "") {
+				user.notifications.pull(target);
+			}
 		}
 
 		await user.save();
@@ -198,6 +208,34 @@ export const addRemoveConnection = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+export const ignoreConnection = async (req, res) => {
+	try {
+		const user = await User.findById(req.params.id).populate("notifications");
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		const connection = await User.findById(req.params.connectionID);
+		if (!connection) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		var notifs = user.notifications;
+		var target = "";
+		notifs.map((notif) => {
+			if (notif.sender._id == req.params.connectionID) {
+				target = notif;
+			}
+		})
+		if (target != "") {
+			user.notifications.pull(target);
+		}
+		await user.save();
+		res.status(200).json({ user });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 
 
 // export const addRemoveFollower = async (req, res) => {
@@ -391,8 +429,11 @@ export const searchByOneInterest = async (req, res) => {
 
 		// Find other users who have at least one common interest with the logged-in user
 		const matchingUsers = await User.find({
-			interests: target_interest,
-			_id: { $ne: currentUser._id },
+			$and: [
+				{ interests: target_interest },
+				{ _id: { $ne: currentUser._id } },
+				{ _id: { $nin: currentUser.connections } },
+			],
 		});
 
 		// Calculate the number of common interests between the logged-in user and each user found in step 2
@@ -445,7 +486,12 @@ export const notifyUser = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
 	try {
-		const user = await User.findById(req.params.id).populate("notifications");
+		const user = await User.findById(req.params.id).populate({
+			path: "notifications",
+			populate: [
+				{ path: "sender" },
+			],
+		});
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}

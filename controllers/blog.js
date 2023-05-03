@@ -30,28 +30,40 @@ const s3 = new S3Client({
 
 
 export const getAllBlogs = async (req, res) => {
-    try {
-        const temp = await Blog.find().populate("owner");
-        temp.map(async blog=>{
-            const getObjectParams = {
-							Bucket: bukcetName,
-							Key: blog.bannerImage,
-						};
-            const command = new GetObjectCommand(getObjectParams);
-            const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-            blog.bannerUrl = bannerUrl;
-            await blog.save();
-        })
-        const blogs = await Blog.find().populate("owner").sort({ date: -1 });
-        res.status(200).json({ blogs });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
+	try {
+		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get the date from one week ago
+		const temp = await Blog.find({ date: { $gte: oneWeekAgo } }).populate(
+			"owner"
+		); // only find blogs from the past week
+		await Promise.all(
+			temp.map(async (blog) => {
+				// use Promise.all to wait for all the async operations to finish
+				const getObjectParams = {
+					Bucket: bukcetName,
+					Key: blog.bannerImage,
+				};
+				const command = new GetObjectCommand(getObjectParams);
+				const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+				blog.bannerUrl = bannerUrl;
+				await blog.save();
+			})
+		);
+		const blogs = await Blog.find({ date: { $gte: oneWeekAgo } })
+			.populate("owner")
+			.sort({ date: -1 }); // only send blogs from the past week
+		res.status(200).json({ blogs });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 
 export const getBlog = async (req, res) => {
     try {
-        const blog = await Blog.findById(req.params.id);
+        const blog = await Blog.findById(req.params.id).populate({
+					path: "comments",
+					populate: { path: "author" },
+				});
         if (!blog) {
             return res.status(404).json({ error: "Blog not found" });
         }
@@ -70,7 +82,9 @@ export const getBlog = async (req, res) => {
 
 export const createBlog = async (req, res) => {
     try {
-        const { title, content, owner, tags, formattedDate, brief } = req.body;
+        const { title, content, owner, formattedDate, brief } = req.body;
+        var {tags} = req.body;
+        tags = tags.split(",");
         const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
         const imgName = randomImgName();
         const params = {
@@ -79,6 +93,8 @@ export const createBlog = async (req, res) => {
             Body: req.file.buffer,
             ContentType: req.file.mimetype,
         };
+
+        console.log(tags);
 
         const command = new PutObjectCommand(params);
         const result = await s3.send(command);
@@ -160,6 +176,7 @@ export const addLike = async (req, res) => {
         blog.save();
         res.status(200).json({ blog });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 }

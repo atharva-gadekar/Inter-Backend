@@ -119,7 +119,7 @@ export const searchAll = async (req, res) => {
         }
     }
 
-    if (firstChar === "#") {
+    if (firstChar === "$") {
         const searchRegex = new RegExp(decodedQuery.slice(1), "i");
         try {
             const search_res = await Blog.find({ tags: searchRegex });
