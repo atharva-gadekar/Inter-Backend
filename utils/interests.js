@@ -1,4 +1,14 @@
 import { Interests } from "../models/Interests.js";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
+
+mongoose
+	.connect(process.env.CONNECTION_URL, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+	.catch((error) => console.log(error.message));
 
 const interests = [
 	{
