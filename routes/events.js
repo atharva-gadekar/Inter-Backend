@@ -12,10 +12,11 @@ import {
 
 // Routes for Events
 router.get("/", getAllEvents);
+router.get("/upcoming", getUpcomingEvents);
+router.get("/past", getPastEvents);
 router.get("/:eventId", getEvent);
 router.patch("/:eventId", updateEvent);
 router.delete("/:eventId", deleteEvent);
-router.get("/upcoming", getUpcomingEvents);
-router.get("/past", getPastEvents);
+
 
 export default router;
