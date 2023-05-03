@@ -31,7 +31,7 @@ const s3 = new S3Client({
 
 
 export const register = async (req, res) => {
-    let { name, email, password, collegeName, year, branch, interests, title, about, username } = req.body;
+    let { name, email, password, collegeName, year, branch, title, about, username } = req.body;
     try {
         var buffer = req.file.buffer;
         console.log(req.file.mimetype);
@@ -56,7 +56,6 @@ export const register = async (req, res) => {
             collegeName,
             year,
             branch,
-            interests,
             title,
             username,
             about
@@ -91,11 +90,13 @@ export const login = async (req, res) => {
             expiresIn,
         });
         const id = user._id;
+        var newUser = false;
+        if(user.interests.length===0) newUser = true;
         delete user.password;
         res.status(200).cookie("jwt_token", jwt_token, {
             httpOnly: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Set cookie expiration
-        }).json({ id, jwt_token });
+        }).json({ id, jwt_token, newUser });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

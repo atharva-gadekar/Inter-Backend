@@ -164,6 +164,7 @@ export const addLike = async (req, res) => {
         blog.save();
         res.status(200).json({ blog });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 }
