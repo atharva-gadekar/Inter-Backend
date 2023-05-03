@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const eventSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -25,5 +24,6 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: false,
     }
+
 });
 export const Events = mongoose.model('Events', eventSchema);

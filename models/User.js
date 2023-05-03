@@ -87,9 +87,9 @@ const userSchema = new mongoose.Schema({
 		},
 	],
 	likedTags: [
-		{ 
+		{
 			type: String,
-			required: false 
+			required: false
 		}],
 	notifications: [
 		{
