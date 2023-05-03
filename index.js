@@ -19,9 +19,10 @@ import conversationRoute from "./routes/conversations.js";
 import messageRoute from "./routes/messages.js";
 import { getBlog } from "./controllers/blog.js"
 import interestRoute from "./routes/interests.js";
+import eventRoute from "./routes/events.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+import { createEvent } from "./controllers/events.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -42,6 +43,7 @@ const upload = multer({ storage });
 
 app.use("/auth/register", upload.single("pfp"), register);
 app.use("/blog/create", authenticateJWT, upload.single("banner"), createBlog);
+app.use("/events/new", upload.single("image"), createEvent);
 
 app.use("/auth", authRoute);
 app.use("/blog", authenticateJWT, blogRoute);
@@ -52,7 +54,7 @@ app.use("/conversations", conversationRoute);
 app.use("/messages", messageRoute);
 app.use("/interests", authenticateJWT, interestRoute);
 //socketio work
-
+app.use("/events", eventRoute);
 //port
 
 const PORT = process.env.PORT || 5000;
