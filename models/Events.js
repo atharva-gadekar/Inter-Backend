@@ -20,6 +20,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    eventUrl: {
+        type: String,
+        required: false,
+    },
     url: {
         type: String,
         required: false,

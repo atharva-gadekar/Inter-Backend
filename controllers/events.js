@@ -31,6 +31,7 @@ export const createEvent = async (req, res) => {
             description,
             date,
             location,
+            eventUrl,
         } = req.body;
 
         // Generate a random name for the image
@@ -55,6 +56,7 @@ export const createEvent = async (req, res) => {
             date,
             location,
             image: imgName,
+            eventUrl,
         });
         await event.save();
 
