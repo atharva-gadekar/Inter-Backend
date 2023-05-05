@@ -56,6 +56,7 @@ const s3 = new S3Client({
 // 		res.status(500).json({ error: error.message });
 // 	}
 // };
+
 export const getAllBlogs = async (req, res) => {
   try {
     const latestBlog = await Blog.findOne({})
@@ -73,8 +74,12 @@ export const getAllBlogs = async (req, res) => {
     const command = new GetObjectCommand(getObjectParams);
     const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
     latestBlog.bannerUrl = bannerUrl;
+    await latestBlog.save();
 
-    res.status(200).json({ latestBlog });
+    const blogs = [];
+    blogs.push(latestBlog);
+
+    res.status(200).json({ blogs });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
