@@ -7,19 +7,26 @@ import { Conversation } from "../models/conversation.js";
 //new conv
 
 router.post("/", async (req, res) => {
-  const newConversation = new Conversation({
-    members: [req.body.senderId, req.body.receiverId],
-    // lastMessage:{},
-    // lastMessageTime: new Date(),
-  });
-
   try {
+    const conversation = await Conversation.findOne({
+      members: { $all: [req.body.senderId, req.body.receiverId] },
+    });
+
+    if (conversation) {
+      return res.status(200).json({ message: "Chat already exists", conversation });
+    }
+
+    const newConversation = new Conversation({
+      members: [req.body.senderId, req.body.receiverId],
+    });
+
     const savedConversation = await newConversation.save();
     res.status(200).json(savedConversation);
   } catch (err) {
     res.status(500).json(err);
   }
 });
+
 
 //get conv of a user
 
