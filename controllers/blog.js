@@ -21,215 +21,244 @@ const accessKeyId = process.env.ACCESS_KEY;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 
 const s3 = new S3Client({
-    credentials: {
-        accessKeyId,
-        secretAccessKey,
-    },
-    region
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+  region
 });
 
 
+// export const getAllBlogs = async (req, res) => {
+// 	try {
+// 		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get the date from one week ago
+// 		const temp = await Blog.find({ date: { $gte: oneWeekAgo } }).populate(
+// 			"owner"
+// 		); // only find blogs from the past week
+// 		await Promise.all(
+// 			temp.map(async (blog) => {
+// 				// use Promise.all to wait for all the async operations to finish
+// 				const getObjectParams = {
+// 					Bucket: bukcetName,
+// 					Key: blog.bannerImage,
+// 				};
+// 				const command = new GetObjectCommand(getObjectParams);
+// 				const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+// 				blog.bannerUrl = bannerUrl;
+// 				await blog.save();
+// 			})
+// 		);
+// 		const blogs = await Blog.find({ date: { $gte: oneWeekAgo } })
+// 			.populate("owner")
+// 			.sort({ date: -1 }); // only send blogs from the past week
+// 		res.status(200).json({ blogs });
+// 	} catch (error) {
+// 		res.status(500).json({ error: error.message });
+// 	}
+// };
+
 export const getAllBlogs = async (req, res) => {
-	try {
-		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get the date from one week ago
-		const temp = await Blog.find({ date: { $gte: oneWeekAgo } }).populate(
-			"owner"
-		); // only find blogs from the past week
-		await Promise.all(
-			temp.map(async (blog) => {
-				// use Promise.all to wait for all the async operations to finish
-				const getObjectParams = {
-					Bucket: bukcetName,
-					Key: blog.bannerImage,
-				};
-				const command = new GetObjectCommand(getObjectParams);
-				const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-				blog.bannerUrl = bannerUrl;
-				await blog.save();
-			})
-		);
-		const blogs = await Blog.find({ date: { $gte: oneWeekAgo } })
-			.populate("owner")
-			.sort({ date: -1 }); // only send blogs from the past week
-		res.status(200).json({ blogs });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
+  try {
+    const latestBlog = await Blog.findOne({})
+      .sort({ date: -1 })
+      .populate("owner"); // find the latest blog in the database and populate the owner field
+
+    if (!latestBlog) {
+      return res.status(404).json({ message: "No blogs found in the database" });
+    }
+
+    const getObjectParams = {
+      Bucket: bukcetName,
+      Key: latestBlog.bannerImage,
+    };
+    const command = new GetObjectCommand(getObjectParams);
+    const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    latestBlog.bannerUrl = bannerUrl;
+    await latestBlog.save();
+
+    const blogs = [];
+    blogs.push(latestBlog);
+
+    res.status(200).json({ blogs });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 
+
 export const getBlog = async (req, res) => {
-    try {
-        const blog = await Blog.findById(req.params.id).populate({
-					path: "comments",
-					populate: { path: "author" },
-				});
-        if (!blog) {
-            return res.status(404).json({ error: "Blog not found" });
-        }
-        const getObjectParams = {
-            Bucket: bukcetName,
-            Key: blog.bannerImage,
-        }
-        const command = new GetObjectCommand(getObjectParams);
-        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        res.status(200).json({ blog, url });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  try {
+    const blog = await Blog.findById(req.params.id).populate({
+      path: "comments",
+      populate: { path: "author" },
+    });
+    if (!blog) {
+      return res.status(404).json({ error: "Blog not found" });
     }
+    const getObjectParams = {
+      Bucket: bukcetName,
+      Key: blog.bannerImage,
+    }
+    const command = new GetObjectCommand(getObjectParams);
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    res.status(200).json({ blog, url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 
 export const createBlog = async (req, res) => {
-    try {
-        const { title, content, owner, formattedDate, brief } = req.body;
-        var {tags} = req.body;
-        tags = tags.split(",");
-        const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
-        const imgName = randomImgName();
-        const params = {
-            Bucket: bukcetName,
-            Key: imgName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
-        };
+  try {
+    const { title, content, owner, formattedDate, brief } = req.body;
+    var { tags } = req.body;
+    tags = tags.split(",");
+    const randomImgName = (bytes = 16) => crypto.randomBytes(bytes).toString("hex");
+    const imgName = randomImgName();
+    const params = {
+      Bucket: bukcetName,
+      Key: imgName,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    };
 
-        console.log(tags);
+    console.log(tags);
 
-        const command = new PutObjectCommand(params);
-        const result = await s3.send(command);
-        const blog = new Blog({
-            title,
-            content,
-            brief,
-            bannerImage: imgName,
-            owner,
-            formattedDate,
-            tags,
-            likes: {},
-            comments: []
-        })
-        await blog.save();
-        const date = blog.formattedDate;
-        res.status(201).json({ blog, date });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
-    }
+    const command = new PutObjectCommand(params);
+    const result = await s3.send(command);
+    const blog = new Blog({
+      title,
+      content,
+      brief,
+      bannerImage: imgName,
+      owner,
+      formattedDate,
+      tags,
+      likes: {},
+      comments: []
+    })
+    await blog.save();
+    const date = blog.formattedDate;
+    res.status(201).json({ blog, date });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
 }
 
 
 export const addComment = async (req, res) => {
-    try {
-        const blog = await Blog.findById(req.params.id);
-        if (!blog) {
-            return res.status(404).json({ error: "Blog not found" });
-        }
-
-        const { content, author } = req.body;
-        const comment = new Comment({
-            content,
-            author,
-            blogID: blog._id,
-        });
-        comment.save();
-
-        // const comment = await Comment.create(req.body);
-        blog.comments.push(comment);
-        blog.save();
-        res.status(201).json({ comment });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ error: "Blog not found" });
     }
+
+    const { content, author } = req.body;
+    const comment = new Comment({
+      content,
+      author,
+      blogID: blog._id,
+    });
+    comment.save();
+
+    // const comment = await Comment.create(req.body);
+    blog.comments.push(comment);
+    blog.save();
+    res.status(201).json({ comment });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 export const addLike = async (req, res) => {
-    try {
-        const blog = await Blog.findById(req.params.id);
-        if (!blog) {
-            return res.status(404).json({ error: "Blog not found" });
-        }
-
-        const { userID } = req.body;
-        const isLiked = blog.likes.get(userID);
-
-        if (isLiked) {
-            blog.likes.delete(userID);
-        } else {
-					blog.likes.set(userID, true);
-					const user = await User.findById(userID);
-
-					let arr1 = [1, 2, 3, 4];
-					let arr2 = [3, 4, 5, 6];
-
-					blog.tags
-						.filter((item) => !user.likedTags.includes(item))
-						.forEach((item) => user.likedTags.push(item));
-
-					console.log(user.likedTags);
-					user.save();
-				}
-
-        const updatedBlog = await Blog.findOneAndUpdate({ _id: req.params.id }, { likes: blog.likes }, { new: true });
-        updatedBlog.save();
-
-        blog.save();
-        res.status(200).json({ blog });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: error.message });
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ error: "Blog not found" });
     }
+
+    const { userID } = req.body;
+    const isLiked = blog.likes.get(userID);
+
+    if (isLiked) {
+      blog.likes.delete(userID);
+    } else {
+      blog.likes.set(userID, true);
+      const user = await User.findById(userID);
+
+      let arr1 = [1, 2, 3, 4];
+      let arr2 = [3, 4, 5, 6];
+
+      blog.tags
+        .filter((item) => !user.likedTags.includes(item))
+        .forEach((item) => user.likedTags.push(item));
+
+      console.log(user.likedTags);
+      user.save();
+    }
+
+    const updatedBlog = await Blog.findOneAndUpdate({ _id: req.params.id }, { likes: blog.likes }, { new: true });
+    updatedBlog.save();
+
+    blog.save();
+    res.status(200).json({ blog });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
 }
 
-export const updateblog= async (req, res) => {
-    try {
-        const blog = await Blog.findById(req.params.id);
-        if (!blog) {
-          return res.status(404).json({ message: "Blog post not found" });
-        }
-    
-        if (req.body.title) {
-          blog.title = req.body.title;
-        }
-    
-        if (req.body.content) {
-          blog.content = req.body.content;
-        }
-    
-        if (req.body.brief) {
-          blog.brief = req.body.brief;
-        }
-    
-        if (req.body.tags) {
-          blog.tags = req.body.tags;
-        }
-        // if(req.body.date){
-        //     blog.date = req.body.date;
-        // }
-        
-    
-        const updatedBlog = await blog.save();
-        res.json(updatedBlog);
-      } catch (error) {
-        res.status(500).json({ message: error.message });
-      }
+export const updateblog = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog post not found" });
+    }
+
+    if (req.body.title) {
+      blog.title = req.body.title;
+    }
+
+    if (req.body.content) {
+      blog.content = req.body.content;
+    }
+
+    if (req.body.brief) {
+      blog.brief = req.body.brief;
+    }
+
+    if (req.body.tags) {
+      blog.tags = req.body.tags;
+    }
+    // if(req.body.date){
+    //     blog.date = req.body.date;
+    // }
+
+
+    const updatedBlog = await blog.save();
+    res.json(updatedBlog);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+}
 
 //delete blog
-export const deleteBlog=async (req, res) => {
-    const { id } = req.params;
-    try {
-      const deletedBlog = await Blog.findByIdAndDelete(id);
-      if (!deletedBlog) {
-        return res.status(404).json({ error: 'Blog not found' });
-      }
-      res.json({ message: 'Blog deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+export const deleteBlog = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(id);
+    if (!deletedBlog) {
+      return res.status(404).json({ error: 'Blog not found' });
     }
+    res.json({ message: 'Blog deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+}
 
-  
+
 
 //   export const getAllComments = async (req, res) => {
 //     try {
