@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
        // set only the text field
       const savedConversation = await conversation.save();
   
-      res.status(200).json(savedConversation);
+      res.status(200).json({savedConversation, savedMessage});
     } catch (err) {
       res.status(500).json(err);
     }
