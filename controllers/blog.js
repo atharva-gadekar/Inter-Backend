@@ -29,33 +29,33 @@ const s3 = new S3Client({
 });
 
 
-// export const getAllBlogs = async (req, res) => {
-// 	try {
-// 		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get the date from one week ago
-// 		const temp = await Blog.find({ date: { $gte: oneWeekAgo } }).populate(
-// 			"owner"
-// 		); // only find blogs from the past week
-// 		await Promise.all(
-// 			temp.map(async (blog) => {
-// 				// use Promise.all to wait for all the async operations to finish
-// 				const getObjectParams = {
-// 					Bucket: bukcetName,
-// 					Key: blog.bannerImage,
-// 				};
-// 				const command = new GetObjectCommand(getObjectParams);
-// 				const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-// 				blog.bannerUrl = bannerUrl;
-// 				await blog.save();
-// 			})
-// 		);
-// 		const blogs = await Blog.find({ date: { $gte: oneWeekAgo } })
-// 			.populate("owner")
-// 			.sort({ date: -1 }); // only send blogs from the past week
-// 		res.status(200).json({ blogs });
-// 	} catch (error) {
-// 		res.status(500).json({ error: error.message });
-// 	}
-// };
+export const getAllBlogs = async (req, res) => {
+	try {
+		const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // get the date from one week ago
+		const temp = await Blog.find({ date: { $gte: oneWeekAgo } }).populate(
+			"owner"
+		); // only find blogs from the past week
+		await Promise.all(
+			temp.map(async (blog) => {
+				// use Promise.all to wait for all the async operations to finish
+				const getObjectParams = {
+					Bucket: bukcetName,
+					Key: blog.bannerImage,
+				};
+				const command = new GetObjectCommand(getObjectParams);
+				const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+				blog.bannerUrl = bannerUrl;
+				await blog.save();
+			})
+		);
+		const blogs = await Blog.find({ date: { $gte: oneWeekAgo } })
+			.populate("owner")
+			.sort({ date: -1 }); // only send blogs from the past week
+		res.status(200).json({ blogs });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
 
 // export const getAllBlogs = async (req, res) => {
 //   try {
@@ -85,25 +85,25 @@ const s3 = new S3Client({
 //   }
 // };
 
-export const getAllBlogs = async (req, res) => {
-	try {
-		const temp = await Blog.find().populate("owner");
-		temp.map(async (blog) => {
-			const getObjectParams = {
-				Bucket: bukcetName,
-				Key: blog.bannerImage,
-			};
-			const command = new GetObjectCommand(getObjectParams);
-			const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-			blog.bannerUrl = bannerUrl;
-			await blog.save();
-		});
-		const blogs = await Blog.find().populate("owner").sort({ date: -1 });
-		res.status(200).json({ blogs });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-};
+// export const getAllBlogs = async (req, res) => {
+// 	try {
+// 		const temp = await Blog.find().populate("owner");
+// 		temp.map(async (blog) => {
+// 			const getObjectParams = {
+// 				Bucket: bukcetName,
+// 				Key: blog.bannerImage,
+// 			};
+// 			const command = new GetObjectCommand(getObjectParams);
+// 			const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+// 			blog.bannerUrl = bannerUrl;
+// 			await blog.save();
+// 		});
+// 		const blogs = await Blog.find().populate("owner").sort({ date: -1 });
+// 		res.status(200).json({ blogs });
+// 	} catch (error) {
+// 		res.status(500).json({ error: error.message });
+// 	}
+// };
 
 
 
