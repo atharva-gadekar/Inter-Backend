@@ -128,7 +128,7 @@ export const forgotPassword = async (req, res) => {
                 subject: 'Password Reset Link',
                 html: `
                     <h2>Please click on given link to reset your password</h2>
-                    <p>${process.env.CLIENT_URL}/resetpassword/${token}</p>
+                    <p>${process.env.CLIENT_URL}/${token}</p>
                 `
             };
             await user.updateOne({ resetLink: token });
