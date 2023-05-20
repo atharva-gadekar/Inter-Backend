@@ -57,53 +57,53 @@ const s3 = new S3Client({
 // 	}
 // };
 
-export const getAllBlogs = async (req, res) => {
-  try {
-    const latestBlog = await Blog.findOne({})
-      .sort({ date: -1 })
-      .populate("owner"); // find the latest blog in the database and populate the owner field
-
-    if (!latestBlog) {
-      return res.status(404).json({ message: "No blogs found in the database" });
-    }
-
-    const getObjectParams = {
-      Bucket: bukcetName,
-      Key: latestBlog.bannerImage,
-    };
-    const command = new GetObjectCommand(getObjectParams);
-    const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    latestBlog.bannerUrl = bannerUrl;
-    await latestBlog.save();
-
-    const blogs = [];
-    blogs.push(latestBlog);
-
-    res.status(200).json({ blogs });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 // export const getAllBlogs = async (req, res) => {
-// 	try {
-// 		const temp = await Blog.find().populate("owner");
-// 		temp.map(async (blog) => {
-// 			const getObjectParams = {
-// 				Bucket: bukcetName,
-// 				Key: blog.bannerImage,
-// 			};
-// 			const command = new GetObjectCommand(getObjectParams);
-// 			const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-// 			blog.bannerUrl = bannerUrl;
-// 			await blog.save();
-// 		});
-// 		const blogs = await Blog.find().populate("owner").sort({ date: -1 });
-// 		res.status(200).json({ blogs });
-// 	} catch (error) {
-// 		res.status(500).json({ error: error.message });
-// 	}
+//   try {
+//     const latestBlog = await Blog.findOne({})
+//       .sort({ date: -1 })
+//       .populate("owner"); // find the latest blog in the database and populate the owner field
+
+//     if (!latestBlog) {
+//       return res.status(404).json({ message: "No blogs found in the database" });
+//     }
+
+//     const getObjectParams = {
+//       Bucket: bukcetName,
+//       Key: latestBlog.bannerImage,
+//     };
+//     const command = new GetObjectCommand(getObjectParams);
+//     const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+//     latestBlog.bannerUrl = bannerUrl;
+//     await latestBlog.save();
+
+//     const blogs = [];
+//     blogs.push(latestBlog);
+
+//     res.status(200).json({ blogs });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
 // };
+
+export const getAllBlogs = async (req, res) => {
+	try {
+		const temp = await Blog.find().populate("owner");
+		temp.map(async (blog) => {
+			const getObjectParams = {
+				Bucket: bukcetName,
+				Key: blog.bannerImage,
+			};
+			const command = new GetObjectCommand(getObjectParams);
+			const bannerUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+			blog.bannerUrl = bannerUrl;
+			await blog.save();
+		});
+		const blogs = await Blog.find().populate("owner").sort({ date: -1 });
+		res.status(200).json({ blogs });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
 
 
 
